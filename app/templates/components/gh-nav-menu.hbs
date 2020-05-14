@@ -66,10 +66,12 @@
             </li>
             <li>
                 {{!-- clicking the Content link whilst on the content screen should reset the filter --}}
-                {{#if (eq this.router.currentRouteName "pages")}}
-                    <LinkTo @route="pages" @query={{hash type=null author=null tag=null order=null}} @classNames="active" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
-                {{else}}
-                    <LinkTo @route="pages" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
+                {{#if (gh-user-can-admin this.session.user)}}
+                    {{#if (eq this.router.currentRouteName "pages")}}
+                        <LinkTo @route="pages" @query={{hash type=null author=null tag=null order=null}} @classNames="active" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
+                    {{else}}
+                        <LinkTo @route="pages" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
+                    {{/if}}
                 {{/if}}
             </li>
             {{#if (gh-user-can-admin this.session.user)}}
