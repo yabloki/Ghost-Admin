@@ -9,6 +9,7 @@ export default BaseValidator.create({
         'authors',
         'customExcerpt',
         'canonicalUrl',
+        'commentPrice',
         'codeinjectionHead',
         'codeinjectionFoot',
         'metaTitle',
@@ -37,6 +38,15 @@ export default BaseValidator.create({
     authors(model) {
         if (isEmpty(model.authors)) {
             model.errors.add('authors', 'At least one author is required.');
+            this.invalidate();
+        }
+    },
+
+    commentPrice(model) {
+        let numberRegex = /^[0-9]*$/;
+
+        if (!numberRegex.test(model.commentPrice)) {
+            model.errors.add('commentPrice', 'Must be a number');
             this.invalidate();
         }
     },
