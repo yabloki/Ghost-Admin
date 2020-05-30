@@ -44,7 +44,6 @@ export default BaseValidator.create({
 
     commentPrice(model) {
         let numberRegex = /^[0-9]*$/;
-
         if (!numberRegex.test(model.commentPrice)) {
             model.errors.add('commentPrice', 'Must be a number');
             this.invalidate();
