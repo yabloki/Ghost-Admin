@@ -141,6 +141,25 @@
                             {{/if}}
                         </GhFormGroup>
 
+                        <GhFormGroup @errors={{this.user.errors}} @hasValidated={{this.user.hasValidated}} @property="eth-address" @class="first-form-group">
+                            <label for="eth-address">Ethereum Address</label>
+                            <GhTextInput
+                                @id="eth-address"
+                                @class="eth-address"
+                                @placeholder="Ethereum Address"
+                                @autocorrect="off"
+                                @value={{readonly this.user.eth_address}}
+                                @input={{action (mut this.user.eth_address) value="target.value"}}
+                                @focus-out={{action "validate" "name" target=this.user}}
+                                data-test-name-input={{true}}
+                            />
+                            {{#if this.user.errors.name}}
+                                <GhErrorMessage @errors={{this.user.errors}} @property="eth-address" data-test-error="user-name" />
+                            {{else}}
+                                <p>Use your personal eth address to get paid </p>
+                            {{/if}}
+                        </GhFormGroup>
+
                         <GhFormGroup @errors={{this.user.errors}} @hasValidated={{this.user.hasValidated}} @property="slug">
                             <label for="user-slug">Slug</label>
                             <GhTextInput

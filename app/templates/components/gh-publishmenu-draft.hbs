@@ -27,6 +27,16 @@
                 <div class="gh-publishmenu-radio-desc">Set automatic future publish date</div>
             </div>
         </div>
+        <GhTextInput
+            @id="comment-price"
+            @class="comment-price"
+            @placeholder="0"
+            @autocorrect="off"
+            @value={{readonly this.post.commentPrice}}
+            @input={{action 'setCommentPrice'}}
+            data-test-name-input={{true}}
+        />
+        <p>Set price of a comment in CNT</p>
     </div>
 
     {{#if (and this.canSendEmail showSendEmail)}}
