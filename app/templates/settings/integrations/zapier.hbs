@@ -10,8 +10,8 @@
     <section class="view-container bt b--lightgrey-d1 pt5">
         <section class="app-grid">
             <div class="app-cell">
-                <div class="bg-white mr3 display flex items-center justify-center br-pill shadow-1 pa3">
-                    <img class="app-icon" src="assets/img/zapiericon.png" />
+                <div class="bg-white mr3 display flex items-center justify-center br-pill shadow-1 pa3 dark-no-shadow">
+                    <img class="app-icon" src="assets/img/zapier.svg" />
                 </div>
             </div>
             <div class="app-cell">
@@ -24,24 +24,28 @@
             <table class="ma0 shadow-1 bg-grouped-table br3" style="table-layout: fixed">
                 <tbody>
                     <tr class="bb b--lightgrey">
-                        <td class="pa3 w50 fw7">Admin API Key</td>
+                        <td class="pa3 w50 fw7 v-top">Admin API Key</td>
                         <td class="pa0">
-                            <div class="pa3 relative truncate {{unless this.copyAdminKey.isRunning "hide-child-instant"}}">
-                                <span class="midgrey" data-test-text="admin-key">
+                            <div class="pa3 relative flex items-center {{unless this.copyAdminKey.isRunning "hide-child-instant"}}">
+                                <span class="midgrey truncate" data-test-text="admin-key">
                                     {{this.integration.adminKey.secret}}
                                 </span>
-                                <div class="absolute top-1 right-2">
-                                    <div class="pt1 pr3 pb1 pl3 bg-black-70 child br3 f8 nudge-top--4 nudge-right--1">
-                                        <button type="button" {{action (perform this.copyAdminKey)}} class="white fw4 flex items-center">
-                                            {{#if this.copyAdminKey.isRunning}}
-                                                {{svg-jar "check-circle" class="w3 v-mid mr2"}} Copied
-                                            {{else}}
-                                                Copy
-                                            {{/if}}
-                                        </button>
-                                    </div>
+                                <div class="absolute top-2 right-2 flex items-stretch child">
+                                    <button type="button" {{action "confirmRegenerateKeyModal" this.integration.adminKey}} class="ba b--lightgrey-d1 br3 pa1 pl2 pr2 flex items-center mr2 bg-white" data-tooltip="Regenerate">
+                                        {{svg-jar "reload" class="w4 h4 stroke-midgrey"}}
+                                    </button>
+                                    <button type="button" {{action (perform this.copyAdminKey)}} class="bg-black-70 f8 pa1 pr3 pl3 br3 white fw4 flex items-center">
+                                        {{#if this.copyAdminKey.isRunning}}
+                                        {{svg-jar "check-circle" class="w3 v-mid mr2 stroke-white"}} Copied
+                                        {{else}}
+                                        Copy
+                                        {{/if}}
+                                    </button>
                                 </div>
                             </div>
+                            {{#if (eq this.regeneratedKeyType this.integration.adminKey.type)}}
+                                <div class="green nt3 mb2 pl3"> Admin API Key was successfully regenerated </div>
+                            {{/if}}
                         </td>
                     </tr>
                     <tr>
@@ -85,3 +89,15 @@
         </div>
     </section>
 </section>
+
+{{#if this.showRegenerateKeyModal}}
+    <GhFullscreenModal @modal="regenerate-key"
+        @model={{hash
+            apiKey=this.selectedApiKey
+            integration=this.integration
+            internalIntegration="zapier"
+        }}
+        @confirm={{action "regenerateKey"}}
+        @close={{action "cancelRegenerateKeyModal"}}
+        @modifier="action wide" />
+{{/if}}

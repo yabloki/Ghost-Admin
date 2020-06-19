@@ -34,6 +34,7 @@
                             @task={{this.saveSettings}}
                             @successText="Saved"
                             @runningText="Saving"
+                            @autoReset={{true}}
                             @class="gh-btn gh-btn-blue gh-btn-icon"
                         />
                     </div>
@@ -205,7 +206,7 @@
                     {{/if}}
 
                     <div style="display:none">
-                        <GhFileInput @multiple={{false}} @action={{uploader.setFiles}} @accept={{this.yamlMimeType}} data-test-file-input="routes" />
+                        <GhFileInput @multiple={{false}} @action={{uploader.setFiles}} @accept={{this.yamlAccept}} data-test-file-input="routes" />
                     </div>
                 </div>
                 </GhUploader>

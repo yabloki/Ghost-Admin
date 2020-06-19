@@ -60,6 +60,7 @@
 @import "layouts/labs.css";
 @import "layouts/whats-new.css";
 @import "layouts/preview-email.css";
+@import "layouts/billing.css";
 
 
 :root {
@@ -240,13 +241,13 @@ input:focus,
     stroke-width: 2px;
 }
 
-.dropdown-menu > li > a,
-.dropdown-menu > li > button {
+.dropdown-menu li > a,
+.dropdown-menu li > button {
     color: color-mod(var(--lightgrey) lightness(+20%));
 }
 
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus,
-.dropdown-menu > li > button:hover, .dropdown-menu > li > button:focus {
+.dropdown-menu li > a:hover, .dropdown-menu li > a:focus,
+.dropdown-menu li > button:hover, .dropdown-menu li > button:focus {
     color: var(--lightgrey);
     background: color-mod(var(--dark-main-bg-color) l(-2%));
 }
@@ -303,12 +304,12 @@ input:focus,
     background: var(--lightgrey);
 }
 
-.dropdown-menu > li > a, .dropdown-menu > li > button {
+.dropdown-menu li > a, .dropdown-menu li > button {
     color: var(--darkgrey);
 }
 
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus,
-.dropdown-menu > li > button:hover, .dropdown-menu > li > button:focus {
+.dropdown-menu li > a:hover, .dropdown-menu li > a:focus,
+.dropdown-menu li > button:hover, .dropdown-menu li > button:focus {
     color: #fff;
 }
 
@@ -437,8 +438,13 @@ input:focus,
 .id-mailchimp img,
 .id-typeform img,
 .id-buffer img,
+.id-unsplash,
 .id-more img {
     filter: invert(100%);
+}
+
+.dark-no-shadow {
+    box-shadow: none;
 }
 
 .gh-nav {
@@ -487,8 +493,14 @@ input:focus,
     background-color: transparent;
 }
 
-/* Dark style Lists */
 
+/* Koenig styles */
+.kg-link-input {
+    border-color: var(--blue) !important;
+}
+
+
+/* Dark style Lists */
 .gh-list {
     background: #212A2E;
 }
@@ -499,6 +511,7 @@ input:focus,
 .apps-grid-cell:hover {
     background: color-mod(var(--lightgrey) l(-9%));
 }
+
 
 /* Members */
 .gh-members-chart-header {

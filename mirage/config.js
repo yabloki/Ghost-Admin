@@ -4,6 +4,7 @@ import mockConfig from './config/config';
 import mockEmails from './config/emails';
 import mockIntegrations from './config/integrations';
 import mockInvites from './config/invites';
+import mockLabels from './config/labels';
 import mockMembers from './config/members';
 import mockPages from './config/pages';
 import mockPosts from './config/posts';
@@ -39,7 +40,6 @@ export default function () {
     this.passthrough();
 
     // add any external domains to make sure those get passed through too
-    this.passthrough('https://count.ghost.org/');
     this.passthrough('http://www.gravatar.com/**');
     this.passthrough('https://cdn.jsdelivr.net/**');
     this.passthrough('https://api.unsplash.com/**');
@@ -60,6 +60,7 @@ export function testConfig() {
     mockIntegrations(this);
     mockInvites(this);
     mockMembers(this);
+    mockLabels(this);
     mockPages(this);
     mockPosts(this);
     mockRoles(this);
@@ -83,14 +84,6 @@ export function testConfig() {
     });
 
     /* External sites ------------------------------------------------------- */
-
-    let downloadCount = 0;
-    this.get('https://count.ghost.org/', function () {
-        downloadCount += 1;
-        return {
-            count: downloadCount
-        };
-    });
 
     this.head('http://www.gravatar.com/avatar/:md5', function () {
         return '';

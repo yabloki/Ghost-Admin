@@ -54,6 +54,8 @@ export default Controller.extend({
     yamlExtension: null,
     yamlMimeType: null,
 
+    yamlAccept: null,
+
     init() {
         this._super(...arguments);
         this.importMimeType = IMPORT_MIME_TYPES;
@@ -61,6 +63,9 @@ export default Controller.extend({
         this.jsonMimeType = JSON_MIME_TYPE;
         this.yamlExtension = YAML_EXTENSION;
         this.yamlMimeType = YAML_MIME_TYPE;
+        // (macOS) Safari only allows files with the `yml` extension to be selected with the specified MIME types
+        // so explicitly allow the `yaml` extension.
+        this.yamlAccept = [...this.yamlMimeType, ...Array.from(this.yamlExtension, extension => '.' + extension)];
     },
 
     actions: {
@@ -105,7 +110,7 @@ export default Controller.extend({
                     this.set('session.user', store.findRecord('user', currentUserId));
 
                     // TODO: keep as notification, add link to view content
-                    notifications.showNotification('Import successful.', {key: 'import.upload.success'});
+                    notifications.showNotification('Import successful', {key: 'import.upload.success'});
 
                     // reload settings
                     return this.settings.reload().then((settings) => {

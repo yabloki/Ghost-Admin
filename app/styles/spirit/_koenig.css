@@ -18,7 +18,8 @@
     -moz-font-feature-settings: "liga" on;
 }
 
-.koenig-editor__editor.__has-no-content:after {
+.koenig-editor__editor.__has-no-content:after,
+.koenig-text-replacement-html-input__editor.__has-no-content:after{
     font-family: georgia,serif;
     font-weight: 300;
     letter-spacing: .02rem;
@@ -857,15 +858,39 @@
 /* Chrome has a bug with its scrollbars on this element which has been reported here: https://bugs.chromium.org/p/chromium/issues/detail?id=697381 */
 .koenig-cardmenu {
     width: 272px;
-    max-height: 500px;
+    max-height: 580px;
     background-clip: padding-box;
     z-index: 9999999; /* have to compete with codemirror */
     left: -16px;
+    top: -10px;
 }
-
 
 /* Cards
 /* --------------------------------------------------------------- */
+
+.kg-card-help {
+    background: color-mod(var(--lightgrey) l(+3%));
+    margin: 12px -13px -9px;
+    padding: 6px;
+}
+
+.kg-card-help p {
+    text-align: center;
+    font-family: sans-serif;
+    font-size: 1.4rem;
+    color: var(--midlightgrey);
+}
+
+.kg-card-help a.kg-card-help-icon-link {
+    text-decoration: none;
+    box-shadow: none;
+    padding-bottom: 2px;
+}
+
+.kg-card-help svg {
+    width: 1.4rem;
+}
+
 .kg-bookmark-card {
     width: 100%;
     box-sizing: border-box;
@@ -957,6 +982,10 @@
     white-space: nowrap;
     display: block;
     line-height: 1.65em;
+}
+
+.kg-email-card p:first-of-type {
+    margin-top: 0;
 }
 
 

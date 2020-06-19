@@ -1,12 +1,13 @@
 /* eslint-disable camelcase */
-import Model, {attr, hasMany} from '@ember-data/model';
+import BaseModel from './base';
 import ValidationEngine from 'ghost-admin/mixins/validation-engine';
+import {attr, hasMany} from '@ember-data/model';
 import {computed} from '@ember/object';
 import {equal, or} from '@ember/object/computed';
 import {inject as service} from '@ember/service';
 import {task} from 'ember-concurrency';
 
-export default Model.extend(ValidationEngine, {
+export default BaseModel.extend(ValidationEngine, {
     validationType: 'user',
 
     name: attr('string'),
@@ -123,7 +124,7 @@ export default Model.extend(ValidationEngine, {
                 ne2Password: ''
             });
 
-            this.notifications.showNotification('Password updated.', {type: 'success', key: 'user.change-password.success'});
+            this.notifications.showNotification('Password updated', {type: 'success', key: 'user.change-password.success'});
 
             // clear errors manually for ne2password because validation
             // engine only clears the "validated proeprty"

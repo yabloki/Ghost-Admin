@@ -14,6 +14,12 @@
         @modifier="action wide" />
 {{/if}}
 
+{{#if this.showBillingModal}}
+    <GhFullscreenModal @modal="billing"
+        @close={{action "toggleBillingModal"}}
+        @modifier="full-overlay billing" />
+{{/if}}
+
 <section class="gh-nav-body">
     <div class="gh-nav-top">
         <ul class="gh-nav-list gh-nav-main">
@@ -31,20 +37,41 @@
         <ul class="gh-nav-list gh-nav-manage">
             <li class="gh-nav-list-h">Manage</li>
             <li class="gh-nav-list-new relative">
-                {{!-- clicking the Content link whilst on the content screen should reset the filter --}}
-                {{#if (eq this.router.currentRouteName "posts")}}
-                    <LinkTo @route="posts" @query={{hash type=null author=null tag=null order=null}} @classNames="active" data-test-nav="posts">{{svg-jar "content"}}Posts</LinkTo>
-                {{else}}
-                    <LinkTo @route="posts" data-test-nav="posts">{{svg-jar "content"}}Posts</LinkTo>
+                <GhLinkToCustomViewsIndex @route="posts" @query={{reset-query-params "posts"}} data-test-nav="posts">{{svg-jar "posts"}}Posts</GhLinkToCustomViewsIndex>
+                <LinkTo @route="editor.new" @model="post" @classNames="gh-secondary-action gh-nav-new-post" @alt="New post" @title="New post" data-test-nav="new-story"><span>{{svg-jar "add-stroke"}}</span></LinkTo>
+                {{#if this.customViews.forPosts}}
+                    <button type="button" class="absolute left-3 top-2 z-9999 flex items-center pl2 h4 gh-nav-button-expand {{if this.navigation.settings.expanded.posts "expanded"}}" {{on "click" (fn this.navigation.toggleExpansion "posts")}}>
+                        {{svg-jar (if this.navigation.settings.expanded.posts "arrow-down-stroke" "arrow-right-stroke")}}
+                    </button>
+                    {{#liquid-if this.navigation.settings.expanded.posts}}
+                        <ul class="gh-nav-view-list">
+                            {{#each this.customViews.forPosts as |view|}}
+                                <li>
+                                    <LinkTo @route="posts" @query={{reset-query-params "posts" view.filter}} data-test-nav-custom="{{view.route}}-{{view.name}}" title="{{view.name}}">
+                                        {{!-- <div class="dib w4 h4 mr2 bg-{{view.color}} br-100"></div> --}}
+                                        <span class="flex items-center svg-{{view.color}}">
+                                            {{#if view.icon}}
+                                                {{svg-jar (or view.icon "post")}}
+                                            {{else}}
+                                                <span class="circle"></span>
+                                            {{/if}}
+                                        </span>
+                                        <span class="gh-nav-viewname">{{view.name}}</span>
+                                    </LinkTo>
+                                </li>
+                            {{/each}}
+                        </ul>
+                    {{/liquid-if}}
                 {{/if}}
-                <LinkTo @route="editor.new" @model="post" @classNames="gh-secondary-action gh-nav-new-post" @alt="New story" data-test-nav="new-story"><span>{{svg-jar "add-stroke"}}</span></LinkTo>
             </li>
             <li>
                 {{!-- clicking the Content link whilst on the content screen should reset the filter --}}
-                {{#if (eq this.router.currentRouteName "pages")}}
-                    <LinkTo @route="pages" @query={{hash type=null author=null tag=null order=null}} @classNames="active" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
-                {{else}}
-                    <LinkTo @route="pages" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
+                {{#if (gh-user-can-admin this.session.user)}}
+                    {{#if (eq this.router.currentRouteName "pages")}}
+                        <LinkTo @route="pages" @query={{hash type=null author=null tag=null order=null}} @classNames="active" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
+                    {{else}}
+                        <LinkTo @route="pages" data-test-nav="pages">{{svg-jar "page"}}Pages</LinkTo>
+                    {{/if}}
                 {{/if}}
             </li>
             {{#if (gh-user-can-admin this.session.user)}}
@@ -52,7 +79,7 @@
             {{/if}}
             {{#if (and this.feature.members (gh-user-can-admin this.session.user))}}
                 <li>
-                    <LinkTo @route="members" @current-when="members member" data-test-nav="members">{{svg-jar "members"}}Members</LinkTo>
+                    <LinkTo @route="members" @current-when="members member" @query={{hash label=null}} data-test-nav="members">{{svg-jar "members"}}Members</LinkTo>
                 </li>
             {{/if}}
             <li><LinkTo @route="staff" data-test-nav="staff">{{svg-jar "staff"}}Staff</LinkTo></li>
@@ -70,6 +97,16 @@
                     </button>
                     <LinkTo @route="settings.labs" data-test-nav="labs">{{svg-jar "labs"}}Labs</LinkTo>
                 </li>
+                {{#if this.showBilling}}
+                    <li class="relative">
+                        <a href="javascript:void(0)" {{action "toggleBillingModal"}} data-test-nav="billing">
+                            {{svg-jar "house"}} View billing
+                        </a>
+                    </li>
+                    <li class="relative gh-nav-pro">
+                        <GhBillingUpdateButton />
+                    </li>
+                {{/if}}
             </ul>
         {{/if}}
 

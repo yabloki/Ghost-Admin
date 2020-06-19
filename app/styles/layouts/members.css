@@ -45,9 +45,18 @@
 /* Members list
 /* ----------------------------------------- */
 
-.view-actions input.gh-members-list-searchfield {
+.members-header .view-actions input.gh-members-list-searchfield {
     min-width: 220px;
     padding-left: 30px;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+
+.members-header .view-actions .gh-input-search-icon {
+    width: 14px;
+    height: 14px;
+    top: 10px;
+    left: 10px;
 }
 
 .gh-members-list-searchfield.active {
@@ -78,11 +87,17 @@ p.gh-members-list-email {
 
 .gh-member-actions-menu {
     top: calc(100% + 6px);
+    left: auto;
+    right: 10px;
 }
 
 .gh-member-actions-menu.fade-out {
     animation-duration: .001s;
     pointer-events: none;
+}
+
+.member-link-copied svg {
+    margin-right: 4px;
 }
 
 .members-header .gh-members-header-search {
@@ -119,7 +134,7 @@ p.gh-members-list-email {
 .gh-members-chart-container {
     height: 186px;
     margin: 0;
-    padding: 0 7px 4px;
+    padding: 4px 7px 11px 2px;
 }
 
 .gh-members-chart-summary {
@@ -132,6 +147,23 @@ p.gh-members-list-email {
     color: var(--darkgrey);
     line-height: 4.0rem;
 }
+
+.members-header .gh-contentfilter {
+    margin-right: 0;
+}
+
+.members-header .gh-contentfilter-tag .gh-contentfilter-menu-trigger {
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 0px !important;
+    border-bottom-right-radius: 0px !important;
+}
+
+.gh-members-not-found-for-label {
+    
+}
+
+/* .members-header .gh-member */
 
 @media (max-width: 1100px) {
     .gh-members-chart-summary-data {
@@ -162,19 +194,19 @@ p.gh-members-list-email {
     .gh-members-chart-summary {
         flex-direction: row;
     }
-    
+
     .gh-members-chart-summary div {
         flex-basis: 33%;
         border-bottom: none;
         justify-content: flex-start;
     }
-    
+
     .gh-members-chart-summary > div:nth-of-type(1),
     .gh-members-chart-summary > div:nth-of-type(2) {
         border-right: 1px solid var(--whitegrey);
     }
 }
-    
+
 @media (max-width: 900px) {
     .members-list .gh-list-header, .gh-list-hidecell-m {
         display: none;
@@ -212,9 +244,9 @@ p.gh-members-list-email {
 
     .gh-members-list-subscribed-at {
         display: inline-block;
-        width: unset;
-        padding: 0 0 16px 64px;
-        margin-top: -7px;
+        width: auto;
+        padding: 0 0 16px 4px;
+        margin-top: -16px;
         font-size: 1.2rem;
     }
 
@@ -232,6 +264,22 @@ p.gh-members-list-email {
 
     .gh-members-subscribed-noname {
         display: inline-block;
+        margin-top: -32px;
+        padding-bottom: 16px;
+    }
+
+    .gh-members-list-geolocation {
+        display: inline-block;
+        padding: 0 0 0 64px;
+        margin-top: -16px;
+        width: auto;
+    }
+
+    .gh-members-list-geolocation::after {
+        content: "–";
+    }
+
+    .gh-members-geolocation-noname {
         margin-top: -32px;
         padding-bottom: 16px;
     }
@@ -273,7 +321,8 @@ label[for="member-description"] + p {
 
 textarea.gh-member-details-textarea {
     max-width: 100%;
-    height: 123px;
+    min-height: 50px;
+    height: 98px;
 }
 
 .gh-member-info-icon {
@@ -296,8 +345,8 @@ textarea.gh-member-details-textarea {
 
 .gh-member-stripe-table td {
     vertical-align: top;
-    font-size: 1.4rem;
-    padding: 6px 12px 6px 0;
+    font-size: 1.3rem;
+    padding: 5px 12px 5px 0;
 }
 
 .gh-member-stripe-label {
@@ -306,7 +355,8 @@ textarea.gh-member-details-textarea {
     width: 200px;
 }
 
-.gh-members-subscribed-checkbox {
+.gh-members-subscribed-checkbox,
+.gh-members-comped-checkbox {
     max-width: 100%;
 }
 
@@ -327,6 +377,14 @@ textarea.gh-member-details-textarea {
 
 .gh-member-stripe-status {
     text-transform: capitalize;
+}
+
+.gh-member-settings-primary {
+    flex-basis: 740px;
+}
+
+.gh-member-settings-secondary {
+    flex-basis: 408px;
 }
 
 /* Import modal

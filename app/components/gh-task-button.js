@@ -1,4 +1,5 @@
 import Component from '@ember/component';
+import config from 'ghost-admin/config/environment';
 import {computed} from '@ember/object';
 import {isBlank} from '@ember/utils';
 import {reads} from '@ember/object/computed';
@@ -27,17 +28,20 @@ const GhTaskButton = Component.extend({
     attributeBindings: ['disabled', 'form', 'type', 'tabindex'],
 
     task: null,
-    taskParams: null,
+    taskArgs: undefined,
     disabled: false,
     defaultClick: false,
     buttonText: 'Save',
     idleClass: '',
     runningClass: '',
     showSuccess: true, // set to false if you want the spinner to show until a transition occurs
+    autoReset: false, // set to false if you want don't want task button to reset after timeout
     successText: 'Saved',
     successClass: 'gh-btn-green',
     failureText: 'Retry',
     failureClass: 'gh-btn-red',
+
+    isTesting: undefined,
 
     // Allowed actions
     action: () => {},
@@ -100,6 +104,9 @@ const GhTaskButton = Component.extend({
     init() {
         this._super(...arguments);
         this._initialPerformCount = this.get('task.performCount');
+        if (this.isTesting === undefined) {
+            this.isTesting = config.environment === 'test';
+        }
     },
 
     click() {
@@ -118,7 +125,6 @@ const GhTaskButton = Component.extend({
             return false;
         }
 
-        let task = this.task;
         let taskName = this.get('task.name');
         let lastTaskName = this.get('task.last.task.name');
 
@@ -128,9 +134,8 @@ const GhTaskButton = Component.extend({
         if (this.isRunning && taskName === lastTaskName) {
             return;
         }
-
         this.action();
-        task.perform(this.taskArgs);
+        this._handleMainTask.perform();
 
         this._restartAnimation.perform();
 
@@ -156,7 +161,24 @@ const GhTaskButton = Component.extend({
             yield timeout(10);
             elem.classList.add('retry-animated');
         }
-    })
+    }),
+
+    _handleMainTask: task(function* () {
+        this._resetButtonState.cancelAll();
+        yield this.task.perform(this.taskArgs);
+        const isTaskSuccess = this.get('task.last.isSuccessful') && this.get('task.last.value');
+        if (this.autoReset && this.showSuccess && isTaskSuccess) {
+            this._resetButtonState.perform();
+        }
+    }),
+
+    _resetButtonState: task(function* () {
+        yield timeout(this.isTesting ? 50 : 2500);
+        if (!this.get('task.last.isRunning')) {
+            // Reset last task to bring button back to idle state
+            yield this.set('task.last', null);
+        }
+    }).restartable()
 });
 
 export default GhTaskButton;

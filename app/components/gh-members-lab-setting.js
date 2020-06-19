@@ -7,12 +7,39 @@ import {set} from '@ember/object';
 const US = {flag: '🇺🇸', name: 'US', baseUrl: 'https://api.mailgun.net/v3'};
 const EU = {flag: '🇪🇺', name: 'EU', baseUrl: 'https://api.eu.mailgun.net/v3'};
 
+const CURRENCIES = [
+    {
+        label: 'USD - US Dollar', value: 'usd'
+    },
+    {
+        label: 'AUD - Australian Dollar', value: 'aud'
+    },
+    {
+        label: 'CAD - Canadian Dollar', value: 'cad'
+    },
+    {
+        label: 'EUR - Euro', value: 'eur'
+    },
+    {
+        label: 'GBP - British Pound', value: 'gbp'
+    }
+];
+
 export default Component.extend({
     feature: service(),
     config: service(),
     mediaQueries: service(),
 
+    currencies: null,
+
+    // passed in actions
+    setMembersSubscriptionSettings() {},
+
     defaultContentVisibility: reads('settings.defaultContentVisibility'),
+
+    selectedCurrency: computed('subscriptionSettings.stripeConfig.plans.monthly.currency', function () {
+        return CURRENCIES.findBy('value', this.get('subscriptionSettings.stripeConfig.plans.monthly.currency'));
+    }),
 
     mailgunRegion: computed('settings.bulkEmailSettings.baseUrl', function () {
         if (!this.settings.get('bulkEmailSettings.baseUrl')) {
@@ -31,14 +58,18 @@ export default Component.extend({
     }),
 
     subscriptionSettings: computed('settings.membersSubscriptionSettings', function () {
-        let subscriptionSettings = this.parseSubscriptionSettings(this.get('settings.membersSubscriptionSettings'));
+        let subscriptionSettings = this.settings.parseSubscriptionSettings(this.get('settings.membersSubscriptionSettings'));
         let stripeProcessor = subscriptionSettings.paymentProcessors.find((proc) => {
             return (proc.adapter === 'stripe');
         });
         let monthlyPlan = stripeProcessor.config.plans.find(plan => plan.interval === 'month');
-        let yearlyPlan = stripeProcessor.config.plans.find(plan => plan.interval === 'year');
-        monthlyPlan.dollarAmount = parseInt(monthlyPlan.amount) ? (monthlyPlan.amount / 100) : 0;
-        yearlyPlan.dollarAmount = parseInt(yearlyPlan.amount) ? (yearlyPlan.amount / 100) : 0;
+        let yearlyPlan = stripeProcessor.config.plans.find(plan => plan.interval === 'year' && plan.name !== 'Complimentary');
+
+        // NOTE: need to be careful about division by zero if we introduce zero decimal currencies
+        //       ref.: https://stripe.com/docs/currencies#zero-decimal
+        monthlyPlan.amount = parseInt(monthlyPlan.amount) ? (monthlyPlan.amount / 100) : 0;
+        yearlyPlan.amount = parseInt(yearlyPlan.amount) ? (yearlyPlan.amount / 100) : 0;
+
         stripeProcessor.config.plans = {
             monthly: monthlyPlan,
             yearly: yearlyPlan
@@ -64,12 +95,14 @@ export default Component.extend({
     init() {
         this._super(...arguments);
         this.set('mailgunRegions', [US, EU]);
+        this.set('currencies', CURRENCIES);
     },
 
     actions: {
         setDefaultContentVisibility(value) {
             this.setDefaultContentVisibility(value);
         },
+
         setBulkEmailSettings(key, event) {
             let bulkEmailSettings = this.get('settings.bulkEmailSettings') || {};
             bulkEmailSettings[key] = event.target.value;
@@ -78,13 +111,15 @@ export default Component.extend({
             }
             this.setBulkEmailSettings(bulkEmailSettings);
         },
+
         setBulkEmailRegion(region) {
             let bulkEmailSettings = this.get('settings.bulkEmailSettings') || {};
             set(bulkEmailSettings, 'baseUrl', region.baseUrl);
             this.setBulkEmailSettings(bulkEmailSettings);
         },
+
         setSubscriptionSettings(key, event) {
-            let subscriptionSettings = this.parseSubscriptionSettings(this.get('settings.membersSubscriptionSettings'));
+            let subscriptionSettings = this.settings.parseSubscriptionSettings(this.get('settings.membersSubscriptionSettings'));
             let stripeProcessor = subscriptionSettings.paymentProcessors.find((proc) => {
                 return (proc.adapter === 'stripe');
             });
@@ -92,16 +127,13 @@ export default Component.extend({
             stripeConfig.product = {
                 name: this.settings.get('title')
             };
-            // TODO: this flag has to be removed as it doesn't serve any purpose
-            if (key === 'isPaid') {
-                subscriptionSettings.isPaid = event;
-            }
+
             if (key === 'secret_token' || key === 'public_token') {
                 stripeConfig[key] = event.target.value;
             }
             if (key === 'month' || key === 'year') {
                 stripeConfig.plans = stripeConfig.plans.map((plan) => {
-                    if (key === plan.interval) {
+                    if (key === plan.interval && plan.name !== 'Complimentary') {
                         plan.amount = parseInt(event.target.value) ? (event.target.value * 100) : 0;
                     }
                     return plan;
@@ -113,44 +145,33 @@ export default Component.extend({
             if (key === 'fromAddress') {
                 subscriptionSettings.fromAddress = event.target.value;
             }
+
+            if (key === 'currency') {
+                stripeProcessor.config.plans.forEach((plan) => {
+                    if (plan.name !== 'Complimentary') {
+                        plan.currency = event.value;
+                    }
+                });
+
+                // NOTE: need to keep Complimentary plans with all available currencies so they don't conflict
+                //       when applied to members with existing subscriptions in different currencies (ref. https://stripe.com/docs/billing/customer#currency)
+                let currentCurrencyComplimentary = stripeProcessor.config.plans.filter(plan => (plan.currency === event.value && plan.name === 'Complimentary'));
+
+                if (!currentCurrencyComplimentary.length) {
+                    let complimentary = {
+                        name: 'Complimentary',
+                        currency: event.value,
+                        interval: 'year',
+                        amount: '0'
+                    };
+
+                    stripeProcessor.config.plans.push(complimentary);
+                }
+
+                stripeProcessor.config.currency = event.value;
+            }
+
             this.setMembersSubscriptionSettings(subscriptionSettings);
         }
-    },
-
-    parseSubscriptionSettings(settingsString) {
-        try {
-            return JSON.parse(settingsString);
-        } catch (e) {
-            return {
-                isPaid: false,
-                allowSelfSignup: true,
-                fromAddress: 'noreply',
-                paymentProcessors: [{
-                    adapter: 'stripe',
-                    config: {
-                        secret_token: '',
-                        public_token: '',
-                        product: {
-                            name: this.settings.get('title')
-                        },
-                        plans: [
-                            {
-                                name: 'Monthly',
-                                currency: 'usd',
-                                interval: 'month',
-                                amount: ''
-                            },
-                            {
-                                name: 'Yearly',
-                                currency: 'usd',
-                                interval: 'year',
-                                amount: ''
-                            }
-                        ]
-                    }
-                }]
-            };
-        }
     }
-
 });

@@ -1,4 +1,5 @@
 import Controller from '@ember/controller';
+import {DEFAULT_QUERY_PARAMS} from 'ghost-admin/helpers/reset-query-params';
 import {alias} from '@ember/object/computed';
 import {computed} from '@ember/object';
 import {get} from '@ember/object';
@@ -36,12 +37,8 @@ export default Controller.extend({
 
     store: service(),
 
+    // default values for these are set in `init` and defined in `helpers/reset-query-params`
     queryParams: ['type', 'author', 'tag', 'order'],
-
-    type: null,
-    author: null,
-    tag: null,
-    order: null,
 
     _hasLoadedTags: false,
     _hasLoadedAuthors: false,
@@ -53,6 +50,7 @@ export default Controller.extend({
         this._super(...arguments);
         this.availableTypes = TYPES;
         this.availableOrders = ORDERS;
+        this.setProperties(DEFAULT_QUERY_PARAMS.posts);
     },
 
     postsInfinityModel: alias('model'),
@@ -65,12 +63,12 @@ export default Controller.extend({
 
     selectedType: computed('type', function () {
         let types = this.get('availableTypes');
-        return types.findBy('value', this.get('type'));
+        return types.findBy('value', this.get('type')) || {value: '!unknown'};
     }),
 
     selectedOrder: computed('order', function () {
         let orders = this.get('availableOrders');
-        return orders.findBy('value', this.get('order'));
+        return orders.findBy('value', this.get('order')) || {value: '!unknown'};
     }),
 
     _availableTags: computed(function () {
@@ -82,7 +80,6 @@ export default Controller.extend({
             .filter(tag => tag.get('id') !== null)
             .sort((tagA, tagB) => tagA.name.localeCompare(tagB.name, undefined, {ignorePunctuation: true}));
         let options = tags.toArray();
-
         options.unshiftObject({name: 'All tags', slug: null});
 
         return options;
@@ -92,7 +89,7 @@ export default Controller.extend({
         let tag = this.get('tag');
         let tags = this.get('availableTags');
 
-        return tags.findBy('slug', tag);
+        return tags.findBy('slug', tag) || {slug: '!unknown'};
     }),
 
     _availableAuthors: computed(function () {
@@ -112,7 +109,7 @@ export default Controller.extend({
         let author = this.get('author');
         let authors = this.get('availableAuthors');
 
-        return authors.findBy('slug', author);
+        return authors.findBy('slug', author) || {slug: '!unknown'};
     }),
 
     actions: {

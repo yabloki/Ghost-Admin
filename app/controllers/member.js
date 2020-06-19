@@ -6,15 +6,19 @@ import {alias} from '@ember/object/computed';
 import {computed, defineProperty} from '@ember/object';
 import {inject as controller} from '@ember/controller';
 import {inject as service} from '@ember/service';
-import {task} from 'ember-concurrency';
+import {task, timeout} from 'ember-concurrency';
 
 const SCRATCH_PROPS = ['name', 'email', 'note'];
 
 export default Controller.extend({
     members: controller(),
+    session: service(),
+    dropdown: service(),
     notifications: service(),
     router: service(),
     store: service(),
+
+    showImpersonateMemberModal: false,
 
     member: alias('model'),
 
@@ -37,6 +41,10 @@ export default Controller.extend({
 
         toggleDeleteMemberModal() {
             this.toggleProperty('showDeleteMemberModal');
+        },
+
+        toggleImpersonateMemberModal() {
+            this.toggleProperty('showImpersonateMemberModal');
         },
 
         save() {
@@ -81,7 +89,7 @@ export default Controller.extend({
         }
     },
 
-    save: task(function* () {
+    saveMember: task(function* () {
         let {member, scratchMember} = this;
 
         // if Cmd+S is pressed before the field loses focus make sure we're
@@ -91,7 +99,7 @@ export default Controller.extend({
 
         try {
             yield member.save();
-
+            member.updateLabels();
             // replace 'member.new' route with 'member' route
             this.replaceRoute('member', member);
 
@@ -103,16 +111,24 @@ export default Controller.extend({
         }
     }).drop(),
 
+    save: task(function* () {
+        yield this.saveMember.perform();
+        yield timeout(2500);
+        if (this.get('saveMember.last.isSuccessful') && this.get('saveMember.last.value')) {
+            // Reset last task to bring button back to idle state
+            yield this.set('saveMember.last', null);
+        }
+    }).drop(),
+
     fetchMember: task(function* (memberId) {
         this.set('isLoading', true);
 
-        yield this.store.findRecord('member', memberId, {
+        let member = yield this.store.findRecord('member', memberId, {
             reload: true
-        }).then((member) => {
-            this.set('member', member);
-            this.set('isLoading', false);
-            return member;
         });
+
+        this.set('member', member);
+        this.set('isLoading', false);
     }),
 
     _saveMemberProperty(propKey, newValue) {

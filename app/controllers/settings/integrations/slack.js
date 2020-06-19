@@ -4,7 +4,7 @@ import boundOneWay from 'ghost-admin/utils/bound-one-way';
 import {empty} from '@ember/object/computed';
 import {isInvalidError} from 'ember-ajax/errors';
 import {inject as service} from '@ember/service';
-import {task} from 'ember-concurrency';
+import {task, timeout} from 'ember-concurrency';
 
 export default Controller.extend({
     ghostPaths: service(),
@@ -94,7 +94,7 @@ export default Controller.extend({
         }
     },
 
-    save: task(function* () {
+    saveTask: task(function* () {
         let slack = this.slackSettings;
         let settings = this.settings;
         let slackArray = this.slackArray;
@@ -113,6 +113,15 @@ export default Controller.extend({
         }
     }).drop(),
 
+    save: task(function* () {
+        yield this.saveTask.perform();
+        yield timeout(2500);
+        if (this.get('saveTask.last.isSuccessful') && this.get('saveTask.last.value')) {
+            // Reset last task to bring button back to idle state
+            yield this.set('saveTask.last', null);
+        }
+    }).drop(),
+
     sendTestNotification: task(function* () {
         let notifications = this.notifications;
         let slackApi = this.get('ghostPaths.url').api('slack', 'test');
@@ -120,7 +129,7 @@ export default Controller.extend({
         try {
             yield this.save.perform();
             yield this.ajax.post(slackApi);
-            notifications.showNotification('Check your Slack channel for the test message!', {type: 'info', key: 'slack-test.send.success'});
+            notifications.showNotification('Test notification sent', {type: 'info', key: 'slack-test.send.success', description: 'Check your Slack channel for the test message'});
             return true;
         } catch (error) {
             notifications.showAPIError(error, {key: 'slack-test:send'});
