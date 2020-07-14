@@ -81,6 +81,7 @@ export default Model.extend(Comparable, ValidationEngine, {
     featured: attr('boolean', {defaultValue: false}),
     featureImage: attr('string'),
     canonicalUrl: attr('string'),
+    commentPrice: attr('string'),
     codeinjectionFoot: attr('string', {defaultValue: ''}),
     codeinjectionHead: attr('string', {defaultValue: ''}),
     customTemplate: attr('string'),

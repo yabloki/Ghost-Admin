@@ -350,6 +350,10 @@ export default Controller.extend({
         if (!this.get('post.titleScratch').trim()) {
             this.set('post.titleScratch', DEFAULT_TITLE);
         }
+        // Set a default comment price
+        if (!this.get('post.commentPrice')) {
+            this.set('post.commentPrice', '0');
+        }
 
         this.set('post.title', this.get('post.titleScratch'));
         this.set('post.customExcerpt', this.get('post.customExcerptScratch'));

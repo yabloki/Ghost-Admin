@@ -78,6 +78,12 @@ export default Component.extend({
             return post.validate();
         },
 
+        setCommentPrice(price) {
+            let post = this.post;
+            post.set('commentPrice', price.target.value);
+            return post.validate();
+        },
+
         setTime(time) {
             let post = this.post;
 
